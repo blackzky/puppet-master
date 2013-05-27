@@ -1,15 +1,30 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  form(method="get", action="/")
-    textarea(id="response", name="response")
-    input(type="submit")
+
+  div#response
+
+  input(id="client_bid", value="client_bid_01")
+  input(id="command", name="command")
+  input(id="submit-command", type="submit")
+
   script(src="/socket.io/socket.io.js")
   script
-    var socket = io.connect('http://localhost:5000');
-    socket.on('news', function (data) {
-      console.log(data);
-      socket.emit('my other event', { my: 'data' });
-    });
+    window.onload = function(){
+      var client_bid = document.querySelector("#client_bid").value;
+
+      var socket = io.connect(window.location, 5000);
+      socket.on('connect', function () {
+        socket.emit("add-client-browser", client_bid);
+      });
+      socket.on('server-to-client-browser-' + client_bid, function (data) {
+        console.log("from server...");
+        console.log(data);
+      });
+      document.addEventListener('keydown', function(event) {
+        var command = document.querySelector("#command").value;
+        if(event.keyCode == 13) {
+          socket.emit('client-browser-to-server-' + client_bid, {command: command});
+        }
+      });
+    }

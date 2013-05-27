@@ -5,7 +5,6 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , user = require('./routes/user')
   , http = require('http')
   , path = require('path');
 
@@ -30,7 +29,6 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 
 var server = app.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
@@ -38,10 +36,34 @@ var server = app.listen(app.get('port'), function(){
 var io = require('socket.io').listen(server)
 http.createServer(app);
 
+var browser_clients = {};
+var app_clients = {};
+
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
+  socket.on("add-client-browser", function(data){
+    var browser = "browser-" + data;
+    if(!browser_clients[browser]){
+      socket.browser = browser_clients[browser] = browser;
+      console.log(browser + " has connected!");
+    }
+  });
+  socket.on("add-client-app", function(data){
+    var app = "app-" + data;
+    if(!browser_clients[app]){
+      socket.app = app_clients[app] = app;
+      console.log(app + " has connected!");
+    }
+  });
+
+  socket.on("client-app-to-server-" + socket.app, function(data){
+    console.log("Relaying data from client-app -> server -> client-browser");
+    //@todo -add a specific client distination
+    socket.emit("server-to-client-browser-" + socket.browser, data);
+  });
+  socket.on('client-browser-to-server-' + socket.browser, function (data) {
+    console.log("Relaying data from client-browser -> server -> client-app");
+    //@todo -add a specific client distination
+    socket.emit("server-to-client-app-" + socket.app, data);
   });
 });
 
