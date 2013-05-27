@@ -2,36 +2,21 @@ extends layout
 
 block content
 
-  div#response
+  div.container.row-fluid
+    div.well.well-large
+      h1.page-header.text-center PuppetMaster
+      div.well
+        p#response.text-center Set your nickname, set the App ID, enter a command and press enter
 
-  input(type="hidden", id="client_bid", value="browser")
-  input(type="text", id="command", name="command")
-  input(type="text", id="client_aid", name="cliend_aid", placeholder="App ID")
+      div.row-fluid
+        div.row-fluid.input-prepend.span8
+          span.add-on $
+          input.input.span11(type="text", id="command", name="command", placeholder="Command")
+          input(type="hidden", id="client_bid", value="browser")
+        div.row-fluid.input-prepend.span4
+          span.add-on
+            i.icon-cog
+          input.input.span11(type="text", id="client_aid", name="cliend_aid", placeholder="App ID")
 
-  script(src="/socket.io/socket.io.js")
-  script
-    window.onload = function(){
-
-      var socket = io.connect(window.location, 5000);
-      socket.on('connect', function () {
-        socket.emit("add-client-browser", "browser");
-
-        var client_bid = document.querySelector("#client_bid").value;
-        socket.on("set-browser-id", function(data){
-          document.querySelector("#client_bid").value = data;
-        });
-        socket.on('server-to-browser-' + document.querySelector("#client_bid").value, function (data) {
-          console.log("from server...");
-          console.log(data);
-        });
-      });
-      document.addEventListener('keydown', function(event) {
-        var command = document.querySelector("#command").value;
-        var bid = document.querySelector("#client_bid").value;
-        var app_id = document.querySelector("#client_aid").value;
-        if(event.keyCode == 13) {
-          socket.emit('browser-to-server', {bid: bid, app_id: app_id, command: command});
-          console.log("send " + command);
-        }
-      });
-    }
+        p
+          a(href="/jar/PuppetMaster.jar") Download the app

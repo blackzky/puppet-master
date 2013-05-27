@@ -62,16 +62,19 @@ io.sockets.on('connection', function (socket) {
 
   socket.on("app-to-server", function(data){
     console.log("[App] Relaying data from client-app -> server -> client-browser");
-    //@todo -add a specific client distination
-    socket.broadcast.emit("server-to-browser-" + data.bid, data);
+    socket.broadcast.emit("server-to-browser", data);
   });
   socket.on('browser-to-server', function (data) {
     console.log("[Browser] Relaying data from client-browser -> server -> client-app");
-    //@todo -add a specific client distination
     socket.broadcast.emit("server-to-client-app-" + data.app_id, data);
   });
 });
 
+io.configure(function () {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+});
+
 var genID = function () {
-  return "_" + Math.random().toString(36).substr(2, 5);
+  return Math.random().toString(36).substr(2, 13);
 };
