@@ -1,5 +1,5 @@
 $(function(){
-    var socket = io.connect(window.location, 5000);
+    var socket = io.connect(window.location, 3000);
     socket.on('connect', function () {
       socket.emit("add-client-browser", "browser");
 

@@ -11,11 +11,10 @@ var express = require('express')
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 5000);
+app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
-app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
@@ -38,6 +37,12 @@ http.createServer(app);
 
 var browser_clients = {};
 var app_clients = {};
+
+io.configure(function (){
+  io.set('authorization', function (handshakeData, callback) {
+    callback(null, true); // error first callback style
+  });
+});
 
 io.sockets.on('connection', function (socket) {
   socket.on("add-client-app", function(data){
@@ -68,11 +73,6 @@ io.sockets.on('connection', function (socket) {
     console.log("[Browser] Relaying data from client-browser -> server -> client-app");
     socket.broadcast.emit("server-to-client-app-" + data.app_id, data);
   });
-});
-
-io.configure(function () {
-  io.set("transports", ["xhr-polling"]);
-  io.set("polling duration", 10);
 });
 
 var genID = function () {
