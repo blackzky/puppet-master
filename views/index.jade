@@ -6,3 +6,10 @@ block content
   form(method="get", action="/")
     textarea(id="response", name="response")
     input(type="submit")
+  script(src="/socket.io/socket.io.js")
+  script
+    var socket = io.connect('http://localhost:5000');
+    socket.on('news', function (data) {
+      console.log(data);
+      socket.emit('my other event', { my: 'data' });
+    });
