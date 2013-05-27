@@ -40,30 +40,38 @@ var browser_clients = {};
 var app_clients = {};
 
 io.sockets.on('connection', function (socket) {
-  socket.on("add-client-browser", function(data){
-    var browser = "browser-" + data;
-    if(!browser_clients[browser]){
-      socket.browser = browser_clients[browser] = browser;
-      console.log(browser + " has connected!");
-    }
-  });
   socket.on("add-client-app", function(data){
-    var app = "app-" + data;
-    if(!browser_clients[app]){
-      socket.app = app_clients[app] = app;
-      console.log(app + " has connected!");
-    }
+    var app_id = "";
+    do{
+      app_id = genID();
+      console.log("[App] generating id: " + app_id);
+    }while(app_clients[app_id]);
+    socket.app_id = app_clients[app_id] = app_id;
+    socket.emit("set-app-id", socket.app_id);
   });
 
-  socket.on("client-app-to-server-" + socket.app, function(data){
-    console.log("Relaying data from client-app -> server -> client-browser");
-    //@todo -add a specific client distination
-    socket.emit("server-to-client-browser-" + socket.browser, data);
+  socket.on("add-client-browser", function(data){
+    var browser_id = "";
+    do{
+      browser_id = genID();
+      console.log("[Browser] generating id: " + browser_id);
+    }while(browser_clients[browser_id]);
+    socket.browser_id = browser_clients[browser_id] = browser_id;
+    socket.emit("set-browser-id", socket.browser_id);
   });
-  socket.on('client-browser-to-server-' + socket.browser, function (data) {
-    console.log("Relaying data from client-browser -> server -> client-app");
+
+  socket.on("app-to-server", function(data){
+    console.log("[App] Relaying data from client-app -> server -> client-browser");
     //@todo -add a specific client distination
-    socket.emit("server-to-client-app-" + socket.app, data);
+    socket.broadcast.emit("server-to-browser-" + data.bid, data);
+  });
+  socket.on('browser-to-server', function (data) {
+    console.log("[Browser] Relaying data from client-browser -> server -> client-app");
+    //@todo -add a specific client distination
+    socket.broadcast.emit("server-to-client-app-" + data.app_id, data);
   });
 });
 
+var genID = function () {
+  return "_" + Math.random().toString(36).substr(2, 5);
+};

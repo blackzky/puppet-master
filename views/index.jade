@@ -4,27 +4,34 @@ block content
 
   div#response
 
-  input(id="client_bid", value="client_bid_01")
-  input(id="command", name="command")
-  input(id="submit-command", type="submit")
+  input(type="hidden", id="client_bid", value="browser")
+  input(type="text", id="command", name="command")
+  input(type="text", id="client_aid", name="cliend_aid", placeholder="App ID")
 
   script(src="/socket.io/socket.io.js")
   script
     window.onload = function(){
-      var client_bid = document.querySelector("#client_bid").value;
 
       var socket = io.connect(window.location, 5000);
       socket.on('connect', function () {
-        socket.emit("add-client-browser", client_bid);
-      });
-      socket.on('server-to-client-browser-' + client_bid, function (data) {
-        console.log("from server...");
-        console.log(data);
+        socket.emit("add-client-browser", "browser");
+
+        var client_bid = document.querySelector("#client_bid").value;
+        socket.on("set-browser-id", function(data){
+          document.querySelector("#client_bid").value = data;
+        });
+        socket.on('server-to-browser-' + document.querySelector("#client_bid").value, function (data) {
+          console.log("from server...");
+          console.log(data);
+        });
       });
       document.addEventListener('keydown', function(event) {
         var command = document.querySelector("#command").value;
+        var bid = document.querySelector("#client_bid").value;
+        var app_id = document.querySelector("#client_aid").value;
         if(event.keyCode == 13) {
-          socket.emit('client-browser-to-server-' + client_bid, {command: command});
+          socket.emit('browser-to-server', {bid: bid, app_id: app_id, command: command});
+          console.log("send " + command);
         }
       });
     }
