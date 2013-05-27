@@ -40,7 +40,7 @@ var app_clients = {};
 
 io.configure(function (){
   io.set('authorization', function (handshakeData, callback) {
-    callback(null, true); // error first callback style
+    callback(null, true);
   });
 });
 
