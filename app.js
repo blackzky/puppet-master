@@ -38,12 +38,6 @@ http.createServer(app);
 var browser_clients = {};
 var app_clients = {};
 
-io.configure(function (){
-  io.set('authorization', function (handshakeData, callback) {
-    callback(null, true);
-  });
-});
-
 io.sockets.on('connection', function (socket) {
   socket.on("add-client-app", function(data){
     var app_id = "";
